@@ -27,7 +27,7 @@
         <result column="C_TYPE_ID" property="typeId"/>
         <result column="typeName" property="typeName"/>
         <result column="C_STATUS" property="status"/>
-        <result column="  " property="isFull"/>
+        <result column="C_IS_FULL" property="isFull"/>
         <!-- 配置映射的关联用户信息 -->
         <!--association:用于映射关联查询单个对象的信息
             property:要将关联查询的用户信息映射到Orders中那个属性
