@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace命名空间，作用就是对sql进行分类化管理，理解sql隔离 注意：使用mapper代理方法开发，namespace有特殊重要的作用，namespace等于mapper接口地址 -->
+<mapper namespace="com.showaye.microappointment.dao.CategoryMapper">
+
+
+    <select id="findAllTypes" resultType="com.showaye.microappointment.model.entity.CategoryDetail">
+
+        SELECT
+            C_ID          id,
+            C_CATEGORY_ID categoryid,
+        C_NAME name,
+        C_PICTURE_URL imageUrl
+        FROM t_category_detail;
+    </select>
+    <select id="findCategoryIdByTypeId" resultType="java.util.Map" parameterType="int">
+        SELECT
+            C_ID          typeId,
+            C_CATEGORY_ID categoryId
+        FROM t_category_detail
+        WHERE C_ID = #{typeId};
+    </select>
+</mapper>

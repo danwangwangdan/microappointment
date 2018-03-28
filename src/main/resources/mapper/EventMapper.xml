@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace命名空间，作用就是对sql进行分类化管理，理解sql隔离 注意：使用mapper代理方法开发，namespace有特殊重要的作用，namespace等于mapper接口地址 -->
+<mapper namespace="com.showaye.microappointment.dao.EventMapper">
+
+    <resultMap id="eventDetailResultMap" type="com.showaye.microappointment.model.dto.EventResp">
+        <id column="C_ID" property="id"/>
+        <result column="C_CONTENT" property="content"/>
+        <result column="C_PICTURE_URL" property="pictureUrl"/>
+        <result column="C_TYPE" property="typeId"/>
+        <result column="C_EXPIRE_TIME" property="expireTime"/>
+        <result column="C_LIKE_COUNT" property="likeCount"/>
+        <result column="C_COLLECT_COUNT" property="collectCount"/>
+        <result column="C_TITLE" property="title"/>
+        <result column="C_LOCATION" property="location"/>
+        <result column="C_LATITUDE" property="latitude"/>
+        <result column="C_LONGITUDE" property="longitude"/>
+        <result column="C_ATTENDED_COUNT" property="attendedCount"/>
+        <result column="C_LIMIT_NUMBER" property="limitNumber"/>
+        <result column="C_CREATE_TIME" property="createTime"/>
+        <result column="C_PICTURE_URL" property="pictureUrl"/>
+        <result column="C_PUBLISHER_ID" property="publisherId"/>
+        <result column="C_CATEGORY_ID" property="categoryId"/>
+        <result column="categoryName" property="categoryName"/>
+        <result column="C_TYPE_ID" property="typeId"/>
+        <result column="typeName" property="typeName"/>
+        <result column="C_STATUS" property="status"/>
+        <result column="  " property="isFull"/>
+        <!-- 配置映射的关联用户信息 -->
+        <!--association:用于映射关联查询单个对象的信息
+            property:要将关联查询的用户信息映射到Orders中那个属性
+          -->
+        <association property="user" javaType="com.showaye.microappointment.model.entity.User">
+            <!-- id:关联查询用户的唯一标识
+                column:指定唯一标识用户信息的列
+                property:映射到user的那个属性
+            -->
+            <id column="C_PUBLISHER_ID" property="id"/>
+            <result column="publisherName" property="username"/>
+        </association>
+    </resultMap>
+    <resultMap type="com.showaye.microappointment.model.dto.EventDetailResp" id="eventAndCommentResultMap"
+               extends="eventDetailResultMap">
+        <!-- 关联订单明细信息
+            一个订单关联查询出了多条订单明细,要使用collection映射
+            collection:对关联查询到的多条记录映射到集合中
+            property:将关联查询到的多条记录映射到orders类的那个属性
+            ofType:指定映射的集合属性中pojo的类型
+        -->
+        <collection property="contracts" ofType="com.showaye.microappointment.model.entity.EventAttend">
+            <!-- id:唯一标识
+                 property：要将订单明细的唯一标识映射到com.mybatis.entity.OrderDetail的那个属性
+             -->
+            <id column="contracterId" property="attendUserId" jdbcType="INTEGER"/>
+            <result column="contractId" property="id"/>
+            <result column="C_CONTRACT_TYPE" property="contractType"/>
+            <result column="C_CONTRACT_NUM" property="contractNum"/>
+            <result column="attenderName" property="attendUsername"/>
+        </collection>
+        <collection property="comments" ofType="com.showaye.microappointment.model.entity.Comment">
+            <id column="commenterId" property="publisherId" jdbcType="INTEGER"/>
+            <result column="commentId" property="id"/>
+            <result column="commentContent" property="content"/>
+            <result column="commenterName" property="publisherName"/>
+        </collection>
+    </resultMap>
+
+    <insert id="insertEvent" parameterType="com.showaye.microappointment.model.entity.Event">
+        INSERT INTO t_event VALUES
+            (NULL, #{title}, #{typeId}, #{location}, #{latitude}, #{longitude}, #{expireTime},
+                   #{limitNumber}, #{content}, #{pictureUrl}, #{publisherId}, 0, 0, 0,
+        current_timestamp, #{categoryId}, 1, 0);
+    </insert>
+    <insert id="insertEventAttendInfo">
+        INSERT INTO t_event_att
+        VALUES
+            (NULL, #{eventId}, #{attenderId}, current_timestamp, #{contractType}, #{contractNum}, #{attenderUsername});
+    </insert>
+
+    <update id="updateEventAttendNum" parameterType="int">
+        UPDATE t_event
+        SET C_ATTENDED_COUNT = C_ATTENDED_COUNT + #{eventJoin}
+        WHERE C_ID = #{eventId};
+    </update>
+
+    <update id="updateEventIsFull" parameterType="int">
+        UPDATE t_event
+        <if test="isFull==0">SET C_IS_FULL = 0</if>
+        <if test="isFull==1">SET C_IS_FULL = 1</if>
+        WHERE C_ID = #{eventId};
+    </update>
+    <update id="updateEventById" parameterType="com.showaye.microappointment.model.entity.Event">
+
+        UPDATE t_event
+        SET C_TITLE       = #{title}, C_TYPE_ID = #{typeId}, C_LOCATION = #{location}, C_LATITUDE = #{latitude},
+            C_LONGITUDE   = #{longitude},
+            C_EXPIRE_TIME = #{expireTime}, C_LIMIT_NUMBER = #{limitNumber}, C_CONTENT = #{content},
+            C_PICTURE_URL = #{pictureUrl}
+        WHERE c_id = #{id};
+
+    </update>
+
+    <update id="updateStatusById" parameterType="integer">
+        UPDATE t_event
+        SET C_STATUS = #{status}
+        WHERE c_id = #{eventId};
+
+    </update>
+    <delete id="deleteEventAttendInfo">
+
+        DELETE FROM t_event_att
+        WHERE C_EVENT_ID = #{eventId} AND C_ATTEND_USER_ID = #{userId};
+    </delete>
+
+    <select id="findAllCategories" resultType="com.showaye.microappointment.model.entity.Category">
+        SELECT
+            C_NAME name,
+            C_ID   id
+        FROM t_category;
+    </select>
+    <select id="findAllTypes" resultType="com.showaye.microappointment.model.entity.CategoryDetail">
+        SELECT
+            C_ID          id,
+            C_CATEGORY_ID categoryId,
+        C_NAME name,
+        C_PICTURE_URL imageUrl
+        FROM t_category_detail;
+    </select>
+    <select id="findTypesByCategoryId" parameterType="int"
+            resultType="com.showaye.microappointment.model.entity.CategoryDetail">
+        SELECT
+            C_ID          id,
+            C_CATEGORY_ID categoryId,
+            C_NAME        name,
+            C_PICTURE_URL imageUrl
+        FROM t_category_detail
+        WHERE C_CATEGORY_ID = #{categoryId};
+    </select>
+    <select id="search" parameterType="string" resultType="com.showaye.microappointment.model.dto.EventGeneralResp">
+        SELECT
+        e.C_ID id,
+        e.C_CONTENT content,
+        e.C_PICTURE_URL pictureUrl,
+        e.C_TITLE title,
+        e.C_TYPE_ID typeId,
+        e.C_EXPIRE_TIME expireTime,
+        e.C_LIKE_COUNT likeCount,
+        e.C_LOCATION location,
+        e.C_COLLECT_COUNT collectCount,
+        e.C_CREATE_TIME createTime,
+        u.C_USERNAME publisherName,
+        cd.C_NAME typeName
+        FROM t_event e, t_user u, t_category_detail cd
+        WHERE e.C_PUBLISHER_ID = u.C_ID AND e.C_TYPE_ID = cd.C_ID AND C_CONTENT LIKE CONCAT('%', #{keyWord}, '%')
+        ORDER BY e.C_CREATE_TIME DESC
+    </select>
+    <select id="findEventGeneralsByTypeId"
+            resultType="com.showaye.microappointment.model.dto.EventGeneralResp">
+        SELECT
+        e.C_ID id,
+        e.C_CONTENT content,
+        e.C_PICTURE_URL pictureUrl,
+        e.C_TITLE title,
+        e.C_TYPE_ID typeId,
+        e.C_EXPIRE_TIME expireTime,
+        e.C_LIKE_COUNT likeCount,
+        e.C_COLLECT_COUNT collectCount,
+        e.C_LOCATION location,
+        e.C_CREATE_TIME createTime,
+        u.C_USERNAME publisherName,
+        cd.C_NAME typeName
+        FROM t_event e, t_user u, t_category_detail cd
+        WHERE e.C_PUBLISHER_ID = u.C_ID AND e.C_TYPE_ID = cd.C_ID AND e.C_TYPE_ID = #{typeId} and e.C_status!=3
+        ORDER BY e.C_CREATE_TIME DESC
+    </select>
+
+    <select id="findEventDetailsByEventId" resultMap="eventAndCommentResultMap">
+        SELECT
+        e.*,
+        cg.C_NAME categoryName,
+        cd.C_NAME typeName,
+        u1.C_USERNAME publisherName,
+        c.C_CONTENT commentContent,
+        c.C_PUBLISHER_ID commenterId,
+        c.C_ID commentId,
+        (SELECT u4.C_USERNAME
+        FROM t_user u4
+        WHERE c.C_PUBLISHER_ID = u4.C_ID) commenterName,
+        ea.C_CONTRACT_TYPE,
+        ea.C_CONTRACT_NUM,
+        ea.C_ID contractId,
+        ea.C_ATTEND_USER_ID contracterId,
+        ea.C_ATTEND_USERNAME attenderName
+        FROM (t_event e, t_user u1, t_category_detail cd, t_category cg)
+        LEFT JOIN t_event_att ea ON ea.C_EVENT_ID = e.C_ID
+        LEFT JOIN t_comment c ON c.C_EVENT_ID = e.C_ID
+        WHERE e.C_PUBLISHER_ID = u1.C_ID AND e.C_CATEGORY_ID = cg.C_ID AND e.C_TYPE_ID = cd.C_ID AND
+        e.C_ID = #{eventId} and e.C_status!=3
+        ORDER BY e.C_CREATE_TIME DESC
+    </select>
+
+    <select id="getLimitNumberByEventId" resultType="java.util.Map" parameterType="int">
+
+        SELECT
+            C_LIMIT_NUMBER
+                             limitNumber,
+            C_ATTENDED_COUNT attendNumber
+        FROM t_event
+        WHERE C_ID = #{eventId};
+    </select>
+
+    <select id="findNearby" parameterType="com.showaye.microappointment.model.dto.LocationReq"
+            resultType="com.showaye.microappointment.model.dto.EventGeneralResp">
+        SELECT
+            e.C_ID            id,
+            e.C_CONTENT       content,
+            e.C_PICTURE_URL   pictureUrl,
+            e.C_TITLE         title,
+            e.C_TYPE_ID       typeId,
+            e.C_EXPIRE_TIME   expireTime,
+            e.C_LIKE_COUNT    likeCount,
+            e.C_COLLECT_COUNT collectCount,
+            e.C_LOCATION      location,
+            e.C_CREATE_TIME   createTime,
+            u.C_USERNAME      publisherName,
+            cd.C_NAME         typeName
+        FROM t_event e, t_user u, t_category_detail cd
+        WHERE e.C_PUBLISHER_ID = u.C_ID AND e.C_TYPE_ID = cd.C_ID and e.C_status!=3 AND
+              C_LATITUDE &gt; #{minLat}
+              AND C_LATITUDE
+                  &lt;
+                  #{maxLat}
+              AND C_LONGITUDE &gt; #{minLng}
+              AND C_LONGITUDE
+                  &lt;
+        #{maxLng}
+        ORDER BY ACOS(SIN((#{latitude} * 3.1415) / 180) * SIN((C_LATITUDE * 3.1415) / 180)
+        + COS((#{latitude} * 3.1415) / 180) * COS((C_LATITUDE * 3.1415) / 180)
+        * COS((#{longitude} * 3.1415) / 180 - (C_LONGITUDE * 3.1415) / 180))
+        * 6380 ASC
+
+
+    </select>
+    <select id="findThreeEventsOrderByTime"
+            resultType="com.showaye.microappointment.model.dto.EventGeneralResp">
+
+        SELECT
+            e.C_ID            id,
+            e.C_CONTENT       content,
+            e.C_PICTURE_URL   pictureUrl,
+            e.C_TITLE         title,
+            e.C_TYPE_ID       typeId,
+            e.C_EXPIRE_TIME   expireTime,
+            e.C_LIKE_COUNT    likeCount,
+            e.C_COLLECT_COUNT collectCount,
+            e.C_LOCATION      location,
+            e.C_CREATE_TIME   createTime,
+            u.C_USERNAME      publisherName,
+            cd.C_NAME         typeName
+        FROM t_event e, t_user u, t_category_detail cd
+        WHERE e.C_PUBLISHER_ID = u.C_ID AND e.C_TYPE_ID = cd.C_ID and e.C_status!=3
+        ORDER BY e.C_CREATE_TIME DESC
+        LIMIT 3;
+    </select>
+
+
+</mapper>

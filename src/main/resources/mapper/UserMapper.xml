@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace命名空间，作用就是对sql进行分类化管理，理解sql隔离 注意：使用mapper代理方法开发，namespace有特殊重要的作用，namespace等于mapper接口地址 -->
+<mapper namespace="com.showaye.microappointment.dao.UserMapper">
+
+    <insert id="insertUser" useGeneratedKeys="true" keyProperty="id"
+            parameterType="com.showaye.microappointment.model.entity.User">
+        INSERT INTO t_user (C_OPEN_ID) VALUES (#{openid});
+    </insert>
+
+
+    <insert id="addComment" parameterType="com.showaye.microappointment.model.entity.Comment">
+        INSERT INTO t_comment VALUES (NULL, #{publisherId}, #{content}, #{eventId}, current_timestamp);
+    </insert>
+    <update id="updateUser" parameterType="com.showaye.microappointment.model.entity.User">
+        UPDATE t_user
+        <trim prefix="set" suffixOverrides=",">
+            <if test="username!=null">C_USERNAME=#{username},</if>
+            <if test="imageUrl!=null">C_IMAGE_URL=#{imageUrl},</if>
+            <if test="city!=null">C_CITY=#{city},</if>
+            <if test="country!=null">C_COUNTRY=#{country},</if>
+            <if test="province!=null">C_PROVINCE=#{province},</if>
+            <if test="gender!=null">C_GENDER=#{gender},</if>
+        </trim>
+        WHERE C_ID = #{id};
+    </update>
+
+
+    <update id="initUser" parameterType="com.showaye.microappointment.model.entity.User"> UPDATE t_user
+    SET C_USERNAME = #{username}, C_IMAGE_URL = #{imageUrl}, C_CITY = #{city}, C_COUNTRY = #{country},
+        C_PROVINCE = #{province}, C_GENDER = #{gender}
+    WHERE C_ID = #{id};</update>
+
+    <select id="findByOpenid" parameterType="string" resultType="com.showaye.microappointment.model.entity.User">
+
+        SELECT
+            C_ID        id,
+            C_USERNAME  username,
+            C_CITY      city,
+            C_COUNTRY   country,
+            C_GENDER    gender,
+            C_IMAGE_URL imageUrl,
+            C_POINT     point,
+            C_PROVINCE  province,
+            C_OPEN_ID   openid
+        FROM t_user
+        WHERE C_OPEN_ID = #{openid};
+    </select>
+    <select id="findById" resultType="com.showaye.microappointment.model.entity.User">
+
+        SELECT
+            C_ID        id,
+            C_USERNAME  username,
+            C_CITY      city,
+            C_COUNTRY   country,
+            C_GENDER    gender,
+            C_IMAGE_URL imageUrl,
+            C_POINT     point,
+            C_PROVINCE  province,
+            C_OPEN_ID   openid
+        FROM t_user
+        WHERE C_ID = #{id};
+    </select>
+    <select id="getAllMyEvents" resultType="com.showaye.microappointment.model.dto.EventGeneralResp">
+
+        SELECT
+            e.C_ID            id,
+            e.C_CONTENT       content,
+            e.C_PICTURE_URL   pictureUrl,
+            e.C_TITLE         title,
+            e.C_TYPE_ID       typeId,
+            e.C_EXPIRE_TIME   expireTime,
+            e.C_LIKE_COUNT    likeCount,
+            e.C_LOCATION      location,
+            e.C_COLLECT_COUNT collectCount,
+            e.C_CREATE_TIME   createTime,
+            u.C_USERNAME      publisherName,
+            cd.C_NAME         typeName
+        FROM t_event e, t_user u, t_category_detail cd
+        WHERE e.C_PUBLISHER_ID = u.C_ID AND e.C_TYPE_ID = cd.C_ID AND e.C_PUBLISHER_ID = #{userId}
+    </select>
+    <select id="getAllMyAttendEvents" resultType="com.showaye.microappointment.model.dto.EventGeneralResp">
+
+        SELECT
+            e.C_ID            id,
+            e.C_CONTENT       content,
+            e.C_PICTURE_URL   pictureUrl,
+            e.C_TITLE         title,
+            e.C_TYPE_ID       typeId,
+            e.C_EXPIRE_TIME   expireTime,
+            e.C_LIKE_COUNT    likeCount,
+            e.C_LOCATION      location,
+            e.C_COLLECT_COUNT collectCount,
+            e.C_CREATE_TIME   createTime,
+            u.C_USERNAME      publisherName,
+            cd.C_NAME         typeName
+        FROM t_event e, t_user u, t_category_detail cd
+        WHERE e.C_PUBLISHER_ID = u.C_ID AND e.C_TYPE_ID = cd.C_ID AND exists(SELECT C_EVENT_ID
+                                                                             FROM t_event_att et
+                                                                             WHERE et.C_ATTEND_USER_ID = #{userId} AND
+                                                                                   e.C_ID = et.C_event_id)
+    </select>
+</mapper>

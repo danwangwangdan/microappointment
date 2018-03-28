@@ -1,0 +1,13 @@
+use microapp;
+ALTER TABLE t_event
+  ADD C_CATEGORY INT(1) DEFAULT 4 NULL
+COMMENT '活动大类型，1为手游 2为PC游戏 3为户外活动 4为其他';
+ALTER TABLE t_event
+  MODIFY C_TYPE_ID INT(1) NOT NULL
+  COMMENT '活动小类型';
+ALTER TABLE t_event
+  CHANGE C_TYPE C_TYPE_ID INT(1) NOT NULL
+COMMENT '活动小类型';
+ALTER TABLE t_event
+  MODIFY C_CATEGORY_ID INT(1) DEFAULT '4'
+  COMMENT '活动大类型，1为手游 2为PC游戏 3为户外活动 4为其他';
