@@ -79,6 +79,13 @@ public class EventServiceTest {
     }
 
     @Test
+    public void getLatest() {
+        BaseResult baseResult = eventService.getLatest();
+        System.out.println(baseResult.toString());
+    }
+
+
+    @Test
     public void publishEvent() {
 
         Event event = new Event();

@@ -8,7 +8,6 @@
     <resultMap id="eventDetailResultMap" type="com.showaye.microappointment.model.dto.EventResp">
         <id column="C_ID" property="id"/>
         <result column="C_CONTENT" property="content"/>
-        <result column="C_PICTURE_URL" property="pictureUrl"/>
         <result column="C_TYPE" property="typeId"/>
         <result column="C_EXPIRE_TIME" property="expireTime"/>
         <result column="C_LIKE_COUNT" property="likeCount"/>
@@ -20,7 +19,6 @@
         <result column="C_ATTENDED_COUNT" property="attendedCount"/>
         <result column="C_LIMIT_NUMBER" property="limitNumber"/>
         <result column="C_CREATE_TIME" property="createTime"/>
-        <result column="C_PICTURE_URL" property="pictureUrl"/>
         <result column="C_PUBLISHER_ID" property="publisherId"/>
         <result column="C_CATEGORY_ID" property="categoryId"/>
         <result column="categoryName" property="categoryName"/>
@@ -41,6 +39,26 @@
             <result column="publisherName" property="username"/>
         </association>
     </resultMap>
+    <resultMap id="eventGeneralMap" type="com.showaye.microappointment.model.dto.EventGeneralResp">
+
+        <id column="C_ID" property="id"/>
+        <result column="C_CONTENT" property="content"/>
+        <result column="C_TYPE" property="typeId"/>
+        <result column="C_EXPIRE_TIME" property="expireTime"/>
+        <result column="C_LIKE_COUNT" property="likeCount"/>
+        <result column="C_COLLECT_COUNT" property="collectCount"/>
+        <result column="C_TITLE" property="title"/>
+        <result column="C_LOCATION" property="location"/>
+        <result column="C_TYPE_ID" property="typeId"/>
+        <result column="typeName" property="typeName"/>
+        <result column="publisherName" property="publisherName"/>
+        <result column="C_CREATE_TIME" property="createTime"/>
+        <collection property="pictureList" ofType="com.showaye.microappointment.model.entity.Picture">
+            <id column="pictureId" property="pictureId"/>
+            <result column="pictureUrl" property="pictureUrl"/>
+        </collection>
+    </resultMap>
+
     <resultMap type="com.showaye.microappointment.model.dto.EventDetailResp" id="eventAndCommentResultMap"
                extends="eventDetailResultMap">
         <!-- 关联订单明细信息
@@ -65,13 +83,18 @@
             <result column="commentContent" property="content"/>
             <result column="commenterName" property="publisherName"/>
         </collection>
+        <collection property="pictureUrls" ofType="com.showaye.microappointment.model.entity.Picture">
+            <id column="pictureId" property="pictureId"/>
+            <result column="pictureUrl" property="pictureUrl"/>
+        </collection>
     </resultMap>
+
 
     <insert id="insertEvent" parameterType="com.showaye.microappointment.model.entity.Event">
         INSERT INTO t_event VALUES
             (NULL, #{title}, #{typeId}, #{location}, #{latitude}, #{longitude}, #{expireTime},
-                   #{limitNumber}, #{content}, #{pictureUrl}, #{publisherId}, 0, 0, 0,
-        current_timestamp, #{categoryId}, 1, 0);
+                   #{limitNumber}, #{content}, #{publisherId}, 0, 0, 0,
+             current_timestamp, #{categoryId}, 1, 0);
     </insert>
     <insert id="insertEventAttendInfo">
         INSERT INTO t_event_att
@@ -96,8 +119,7 @@
         UPDATE t_event
         SET C_TITLE       = #{title}, C_TYPE_ID = #{typeId}, C_LOCATION = #{location}, C_LATITUDE = #{latitude},
             C_LONGITUDE   = #{longitude},
-            C_EXPIRE_TIME = #{expireTime}, C_LIMIT_NUMBER = #{limitNumber}, C_CONTENT = #{content},
-            C_PICTURE_URL = #{pictureUrl}
+            C_EXPIRE_TIME = #{expireTime}, C_LIMIT_NUMBER = #{limitNumber}, C_CONTENT = #{content}
         WHERE c_id = #{id};
 
     </update>
@@ -124,8 +146,8 @@
         SELECT
             C_ID          id,
             C_CATEGORY_ID categoryId,
-        C_NAME name,
-        C_PICTURE_URL imageUrl
+            C_NAME        name,
+            C_PICTURE_URL imageUrl
         FROM t_category_detail;
     </select>
     <select id="findTypesByCategoryId" parameterType="int"
@@ -138,67 +160,57 @@
         FROM t_category_detail
         WHERE C_CATEGORY_ID = #{categoryId};
     </select>
-    <select id="search" parameterType="string" resultType="com.showaye.microappointment.model.dto.EventGeneralResp">
+    <select id="search" parameterType="string" resultMap="eventGeneralMap">
+
         SELECT
-        e.C_ID id,
-        e.C_CONTENT content,
-        e.C_PICTURE_URL pictureUrl,
-        e.C_TITLE title,
-        e.C_TYPE_ID typeId,
-        e.C_EXPIRE_TIME expireTime,
-        e.C_LIKE_COUNT likeCount,
-        e.C_LOCATION location,
-        e.C_COLLECT_COUNT collectCount,
-        e.C_CREATE_TIME createTime,
-        u.C_USERNAME publisherName,
-        cd.C_NAME typeName
-        FROM t_event e, t_user u, t_category_detail cd
+            e.*,
+            u.C_USERNAME publisherName,
+            cd.C_NAME    typeName
+        FROM (t_event e, t_user u, t_category_detail cd)
+            LEFT JOIN t_picture p ON e.C_ID = p.C_EVENT_ID
         WHERE e.C_PUBLISHER_ID = u.C_ID AND e.C_TYPE_ID = cd.C_ID AND C_CONTENT LIKE CONCAT('%', #{keyWord}, '%') AND
-        e.C_status != 3
+              e.C_status != 3
         ORDER BY e.C_CREATE_TIME DESC
     </select>
     <select id="findEventGeneralsByTypeId"
-            resultType="com.showaye.microappointment.model.dto.EventGeneralResp">
+            resultMap="eventGeneralMap">
+
         SELECT
-        e.C_ID id,
-        e.C_CONTENT content,
-        e.C_PICTURE_URL pictureUrl,
-        e.C_TITLE title,
-        e.C_TYPE_ID typeId,
-        e.C_EXPIRE_TIME expireTime,
-        e.C_LIKE_COUNT likeCount,
-        e.C_COLLECT_COUNT collectCount,
-        e.C_LOCATION location,
-        e.C_CREATE_TIME createTime,
-        u.C_USERNAME publisherName,
-        cd.C_NAME typeName
-        FROM t_event e, t_user u, t_category_detail cd
+            e.*,
+            u.C_USERNAME publisherName,
+            cd.C_NAME    typeName
+        FROM (t_event e, t_user u, t_category_detail cd)
+            LEFT JOIN t_picture p ON e.C_ID = p.C_EVENT_ID
         WHERE e.C_PUBLISHER_ID = u.C_ID AND e.C_TYPE_ID = cd.C_ID AND e.C_TYPE_ID = #{typeId} AND e.C_status != 3
         ORDER BY e.C_CREATE_TIME DESC
     </select>
 
     <select id="findEventDetailsByEventId" resultMap="eventAndCommentResultMap">
         SELECT
-        e.*,
-        cg.C_NAME categoryName,
-        cd.C_NAME typeName,
-        u1.C_USERNAME publisherName,
-        c.C_CONTENT commentContent,
-        c.C_PUBLISHER_ID commenterId,
-        c.C_ID commentId,
-        (SELECT u4.C_USERNAME
-        FROM t_user u4
-        WHERE c.C_PUBLISHER_ID = u4.C_ID) commenterName,
-        ea.C_CONTRACT_TYPE,
-        ea.C_CONTRACT_NUM,
-        ea.C_ID contractId,
-        ea.C_ATTEND_USER_ID contracterId,
-        ea.C_ATTEND_USERNAME attenderName
+            e.*,
+            cg.C_NAME                          categoryName,
+            cd.C_NAME                          typeName,
+            u1.C_USERNAME                      publisherName,
+            c.C_CONTENT                        commentContent,
+            c.C_PUBLISHER_ID                   commenterId,
+            c.C_ID                             commentId,
+            (SELECT u4.C_USERNAME
+             FROM t_user u4
+             WHERE c.C_PUBLISHER_ID = u4.C_ID) commenterName,
+            ea.C_CONTRACT_TYPE,
+            ea.C_CONTRACT_NUM,
+            ea.C_ID                            contractId,
+            ea.C_ATTEND_USER_ID                contracterId,
+            ea.C_ATTEND_USERNAME               attenderName,
+            p.C_ID                             pictureId,
+
+            p.C_URL                            pictureUrl
         FROM (t_event e, t_user u1, t_category_detail cd, t_category cg)
-        LEFT JOIN t_event_att ea ON ea.C_EVENT_ID = e.C_ID
-        LEFT JOIN t_comment c ON c.C_EVENT_ID = e.C_ID
+            LEFT JOIN t_event_att ea ON ea.C_EVENT_ID = e.C_ID
+            LEFT JOIN t_comment c ON c.C_EVENT_ID = e.C_ID
+            LEFT JOIN t_picture p ON e.C_ID = p.C_EVENT_ID
         WHERE e.C_PUBLISHER_ID = u1.C_ID AND e.C_CATEGORY_ID = cg.C_ID AND e.C_TYPE_ID = cd.C_ID AND
-        e.C_ID = #{eventId} AND e.C_status != 3
+              e.C_ID = #{eventId} AND e.C_status != 3
         ORDER BY e.C_CREATE_TIME DESC
     </select>
 
@@ -213,21 +225,14 @@
     </select>
 
     <select id="findNearby" parameterType="com.showaye.microappointment.model.dto.LocationReq"
-            resultType="com.showaye.microappointment.model.dto.EventGeneralResp">
+            resultMap="eventGeneralMap">
+
         SELECT
-            e.C_ID            id,
-            e.C_CONTENT       content,
-            e.C_PICTURE_URL   pictureUrl,
-            e.C_TITLE         title,
-            e.C_TYPE_ID       typeId,
-            e.C_EXPIRE_TIME   expireTime,
-            e.C_LIKE_COUNT    likeCount,
-            e.C_COLLECT_COUNT collectCount,
-            e.C_LOCATION      location,
-            e.C_CREATE_TIME   createTime,
-            u.C_USERNAME      publisherName,
-            cd.C_NAME         typeName
-        FROM t_event e, t_user u, t_category_detail cd
+            e.*,
+            u.C_USERNAME publisherName,
+            cd.C_NAME    typeName
+        FROM (t_event e, t_user u, t_category_detail cd)
+            LEFT JOIN t_picture p ON e.C_ID = p.C_EVENT_ID
         WHERE e.C_PUBLISHER_ID = u.C_ID AND e.C_TYPE_ID = cd.C_ID AND e.C_status != 3 AND
               C_LATITUDE &gt; #{minLat}
               AND C_LATITUDE
@@ -236,34 +241,35 @@
               AND C_LONGITUDE &gt; #{minLng}
               AND C_LONGITUDE
                   &lt;
-        #{maxLng}
+                  #{maxLng}
         ORDER BY ACOS(SIN((#{latitude} * 3.1415) / 180) * SIN((C_LATITUDE * 3.1415) / 180)
-        + COS((#{latitude} * 3.1415) / 180) * COS((C_LATITUDE * 3.1415) / 180)
-        * COS((#{longitude} * 3.1415) / 180 - (C_LONGITUDE * 3.1415) / 180))
-        * 6380 ASC
+                      + COS((#{latitude} * 3.1415) / 180) * COS((C_LATITUDE * 3.1415) / 180)
+                        * COS((#{longitude} * 3.1415) / 180 - (C_LONGITUDE * 3.1415) / 180))
+                 * 6380 ASC
 
 
     </select>
     <select id="findThreeEventsOrderByTime"
-            resultType="com.showaye.microappointment.model.dto.EventGeneralResp">
+            resultMap="eventGeneralMap">
 
         SELECT
-            e.C_ID            id,
-            e.C_CONTENT       content,
-            e.C_PICTURE_URL   pictureUrl,
-            e.C_TITLE         title,
-            e.C_TYPE_ID       typeId,
-            e.C_EXPIRE_TIME   expireTime,
-            e.C_LIKE_COUNT    likeCount,
-            e.C_COLLECT_COUNT collectCount,
-            e.C_LOCATION      location,
-            e.C_CREATE_TIME   createTime,
-            u.C_USERNAME      publisherName,
-            cd.C_NAME         typeName
-        FROM t_event e, t_user u, t_category_detail cd
+            e.*,
+            u.C_USERNAME publisherName,
+            cd.C_NAME    typeName
+        FROM (t_event e, t_user u, t_category_detail cd)
+            LEFT JOIN t_picture p ON e.C_ID = p.C_EVENT_ID
         WHERE e.C_PUBLISHER_ID = u.C_ID AND e.C_TYPE_ID = cd.C_ID AND e.C_status != 3
         ORDER BY e.C_CREATE_TIME DESC
         LIMIT 3;
+    </select>
+
+    <select id="findPicByEventId" resultType="com.showaye.microappointment.model.entity.Picture">
+
+        SELECT
+            p.C_ID  pictureId,
+            p.C_URL pictureUrl
+        FROM t_picture p
+        WHERE C_EVENT_ID = #{eventId}
     </select>
 
 

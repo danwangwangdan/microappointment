@@ -11,10 +11,7 @@ import com.showaye.microappointment.model.dto.EventDetailResp;
 import com.showaye.microappointment.model.dto.EventGeneralResp;
 import com.showaye.microappointment.model.dto.EventResp;
 import com.showaye.microappointment.model.dto.LocationReq;
-import com.showaye.microappointment.model.entity.Category;
-import com.showaye.microappointment.model.entity.CategoryDetail;
-import com.showaye.microappointment.model.entity.Event;
-import com.showaye.microappointment.model.entity.EventAttend;
+import com.showaye.microappointment.model.entity.*;
 import com.showaye.microappointment.service.EventService;
 import com.showaye.microappointment.util.MapUtil;
 import com.showaye.microappointment.util.PropertiesUtil;
@@ -25,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
@@ -363,21 +361,13 @@ public class EventServiceImpl implements EventService {
         Map<String, Integer> typeCategoryMap = categoryMapper.findCategoryIdByTypeId(event.getTypeId());
         event.setCategoryId(typeCategoryMap.get("categoryId"));
 
-        if (StringUtils.isBlank(event.getPictureUrl())) {
-            switch (event.getCategoryId()) {
-                case Category.CATEGORY_MOBILE_GAME:
-                    event.setPictureUrl(DefaultEventPictureUrl.PICTURE_MOBILE_GAME);
-                    break;
-                case Category.CATEGORY_PC_GAME:
-                    event.setPictureUrl(DefaultEventPictureUrl.PICTURE_PC_GAME);
-                    break;
-                case Category.CATEGORY_OUTDOOR_ACTIVITY:
-                    event.setPictureUrl(DefaultEventPictureUrl.PICTURE_OUTDOOR);
-                    break;
-                case Category.CATEGORY_OTHERS:
-                    event.setPictureUrl(DefaultEventPictureUrl.PICTURE_OTHERS);
-                    break;
-            }
+        if (event.getPictureUrls() == null || event.getPictureUrls().size() == 0) {
+            List<Picture> pictures = new ArrayList<>();
+            Picture picture = new Picture();
+            picture.setPictureUrl(DefaultEventPictureUrl.PICTURE_OTHERS);
+            picture.setEventId(event.getId());
+            pictures.add(picture);
+            event.setPictureUrls(pictures);
         }
 
         if (event.getLimitNumber() == null || event.getLimitNumber() == 0) {

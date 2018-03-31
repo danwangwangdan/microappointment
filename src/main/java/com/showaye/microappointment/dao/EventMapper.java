@@ -6,6 +6,7 @@ import com.showaye.microappointment.model.dto.LocationReq;
 import com.showaye.microappointment.model.entity.Category;
 import com.showaye.microappointment.model.entity.CategoryDetail;
 import com.showaye.microappointment.model.entity.Event;
+import com.showaye.microappointment.model.entity.Picture;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -45,5 +46,7 @@ public interface EventMapper {
     List<EventGeneralResp> findNearby(LocationReq locationReq);
 
     List<EventGeneralResp> findThreeEventsOrderByTime();
+
+    List<Picture> findPicByEventId(int eventId);
 
 }

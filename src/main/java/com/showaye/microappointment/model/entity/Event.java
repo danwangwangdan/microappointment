@@ -3,6 +3,7 @@ package com.showaye.microappointment.model.entity;
 import com.showaye.microappointment.model.base.BaseModel;
 
 import java.util.Date;
+import java.util.List;
 
 
 public class Event extends BaseModel {
@@ -38,7 +39,8 @@ public class Event extends BaseModel {
      * 活动详情
      */
     private String content;
-    private String pictureUrl;
+
+    private List<Picture> pictureUrls;
     private Integer publisherId;
     private String attendedCount;
     private Integer likeCount;
@@ -50,6 +52,7 @@ public class Event extends BaseModel {
      * 是否满员
      */
     private Integer isFull;
+
 
     public Integer getStatus() {
         return status;
@@ -71,6 +74,15 @@ public class Event extends BaseModel {
      * 发布者信息
      */
     private User user;
+
+    public List<Picture> getPictureUrls() {
+        return pictureUrls;
+    }
+
+    public void setPictureUrls(List<Picture> pictureUrls) {
+        this.pictureUrls = pictureUrls;
+    }
+
 
     public Integer getId() {
         return id;
@@ -153,13 +165,6 @@ public class Event extends BaseModel {
         this.content = content;
     }
 
-    public String getPictureUrl() {
-        return pictureUrl;
-    }
-
-    public void setPictureUrl(String pictureUrl) {
-        this.pictureUrl = pictureUrl;
-    }
 
     public Integer getPublisherId() {
         return publisherId;
@@ -224,4 +229,5 @@ public class Event extends BaseModel {
     public void setTypeName(String typeName) {
         this.typeName = typeName;
     }
+
 }

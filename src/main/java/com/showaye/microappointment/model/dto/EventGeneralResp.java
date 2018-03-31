@@ -1,8 +1,10 @@
 package com.showaye.microappointment.model.dto;
 
 import com.showaye.microappointment.model.base.BaseModel;
+import com.showaye.microappointment.model.entity.Picture;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * 活动列表使用的活动信息，只有整个event的部分属性
@@ -24,7 +26,9 @@ public class EventGeneralResp extends BaseModel {
      */
     private String content;
     private String publisherName;
-    private String pictureUrl;
+
+    private List<Picture> pictureList;
+
     private Integer likeCount;
     private Integer collectCount;
     private Date createTime;
@@ -67,14 +71,6 @@ public class EventGeneralResp extends BaseModel {
 
     public void setContent(String content) {
         this.content = content;
-    }
-
-    public String getPictureUrl() {
-        return pictureUrl;
-    }
-
-    public void setPictureUrl(String pictureUrl) {
-        this.pictureUrl = pictureUrl;
     }
 
     public Integer getLikeCount() {
@@ -123,5 +119,13 @@ public class EventGeneralResp extends BaseModel {
 
     public void setTypeId(Integer typeId) {
         this.typeId = typeId;
+    }
+
+    public List<Picture> getPictureList() {
+        return pictureList;
+    }
+
+    public void setPictureList(List<Picture> pictureList) {
+        this.pictureList = pictureList;
     }
 }
