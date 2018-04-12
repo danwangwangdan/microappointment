@@ -6,6 +6,7 @@ import com.showaye.microappointment.constant.DefaultEventPictureUrl;
 import com.showaye.microappointment.constant.ResultConstant;
 import com.showaye.microappointment.dao.CategoryMapper;
 import com.showaye.microappointment.dao.EventMapper;
+import com.showaye.microappointment.dao.PictureMapper;
 import com.showaye.microappointment.model.base.BaseResult;
 import com.showaye.microappointment.model.dto.EventDetailResp;
 import com.showaye.microappointment.model.dto.EventGeneralResp;
@@ -22,7 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +35,8 @@ public class EventServiceImpl implements EventService {
     private static Logger log = LoggerFactory.getLogger(EventServiceImpl.class);
     @Autowired
     private EventMapper eventMapper;
+    @Autowired
+    private PictureMapper pictureMapper;
     @Autowired
     private CategoryMapper categoryMapper;
 
@@ -174,6 +176,39 @@ public class EventServiceImpl implements EventService {
         return baseResult;
     }
 
+    @Override
+    public BaseResult findEventDetailsByMyEvent(Integer eventId, Integer userId) {
+
+        BaseResult baseResult = new BaseResult();
+        boolean isAttender = false;
+        try {
+            EventDetailResp eventDetail = eventMapper.findEventDetailsByMyEvent(eventId);
+            // 判断是否为活动参加者
+            if (eventDetail.getContracts().size() > 0) {
+                for (EventAttend eventAttend : eventDetail.getContracts()) {
+                    if (eventAttend.getAttendUserId().intValue() == userId.intValue()) {
+                        isAttender = true;
+                    }
+                }
+            }
+            // 设置 用户类型
+            if (userId.intValue() == eventDetail.getPublisherId().intValue()) {
+                eventDetail.setUserType(EventResp.PUBLISHER);
+            } else if (isAttender) {
+                eventDetail.setUserType(EventResp.ATTENDER);
+            } else {
+                eventDetail.setUserType(EventResp.VISITOR);
+            }
+            baseResult.setData(eventDetail);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("findEventDetailsByEventId错误：" + e.toString());
+            baseResult.setCode(ResultConstant.SYSTEM_EXCEPTION.code);
+            baseResult.setMessage(ResultConstant.SYSTEM_EXCEPTION.message);
+        }
+        return baseResult;
+    }
+
     // @CacheEvict(value = {"search", "findEventDetailsByEventId", "findEventGeneralsByTypeId", "UserServiceImpl.getAllMyEvents", "UserServiceImpl.getAllMyAttendEvents"}, allEntries = true)
     @Override
     @Transactional
@@ -185,6 +220,21 @@ public class EventServiceImpl implements EventService {
             if (checkEvent(event, baseResult)) return baseResult;
 
             int i = eventMapper.insertEvent(event);
+            //最新的id
+            int lastId = eventMapper.getLastInsertId();
+            //插入图片 如果图片为空设置一个默认,否则关联事件后插入图片
+            if (event.getPictureUrls() == null || event.getPictureUrls().size() == 0) {
+                Picture picture = new Picture();
+                picture.setPictureUrl(DefaultEventPictureUrl.PICTURE_OTHERS);
+                picture.setEventId(lastId);
+                pictureMapper.insertPicture(picture);
+            } else {
+                for (Picture picture : event.getPictureUrls()) {
+                    picture.setEventId(lastId);
+                    pictureMapper.insertPicture(picture);
+                }
+            }
+
             if (i <= 0) {
                 baseResult.setCode(ResultConstant.DATABASE_ERROR.code);
                 baseResult.setMessage(ResultConstant.DATABASE_ERROR.message);
@@ -282,6 +332,20 @@ public class EventServiceImpl implements EventService {
             if (checkEvent(event, baseResult)) return baseResult;
             // 更新活动信息
             int i = eventMapper.updateEventById(event);
+            //更新图片 如果图片为空设置一个默认,否则关联事件后插入图片（原来的图片不管）
+            if (event.getPictureUrls() == null || event.getPictureUrls().size() == 0) {
+                Picture picture = new Picture();
+                picture.setPictureUrl(DefaultEventPictureUrl.PICTURE_OTHERS);
+                picture.setEventId(event.getId());
+                pictureMapper.insertPicture(picture);
+            } else {
+                for (Picture picture : event.getPictureUrls()) {
+                    picture.setEventId(event.getId());
+                    pictureMapper.insertPicture(picture);
+                }
+            }
+
+
             log.info("update更新了{}行", i);
         } catch (Exception e) {
             e.printStackTrace();
@@ -360,15 +424,6 @@ public class EventServiceImpl implements EventService {
         }
         Map<String, Integer> typeCategoryMap = categoryMapper.findCategoryIdByTypeId(event.getTypeId());
         event.setCategoryId(typeCategoryMap.get("categoryId"));
-
-        if (event.getPictureUrls() == null || event.getPictureUrls().size() == 0) {
-            List<Picture> pictures = new ArrayList<>();
-            Picture picture = new Picture();
-            picture.setPictureUrl(DefaultEventPictureUrl.PICTURE_OTHERS);
-            picture.setEventId(event.getId());
-            pictures.add(picture);
-            event.setPictureUrls(pictures);
-        }
 
         if (event.getLimitNumber() == null || event.getLimitNumber() == 0) {
             event.setLimitNumber(0);

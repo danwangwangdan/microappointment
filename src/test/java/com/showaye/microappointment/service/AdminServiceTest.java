@@ -7,15 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.junit.Assert.*;
-
 /**
  * @Author Zhang Yanfu
  * @Date 2018/2/4.
  * @Email 1105564280@qq.com
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = "classpath:springContext.xml")
+@ContextConfiguration(locations = "classpath:springContext_dev.xml")
 public class AdminServiceTest {
 
     @Autowired

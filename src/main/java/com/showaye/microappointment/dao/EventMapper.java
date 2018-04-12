@@ -27,6 +27,8 @@ public interface EventMapper {
 
     EventDetailResp findEventDetailsByEventId(@Param("eventId") Integer eventId);
 
+    EventDetailResp findEventDetailsByMyEvent(@Param("eventId") Integer eventId);
+
     int insertEvent(Event event);
 
     int insertEventAttendInfo(@Param("eventId") Integer eventId, @Param("attenderId") Integer attenderId, @Param("contractType") Integer contractType, @Param("contractNum") String contractNum, @Param("attenderUsername") String attenderUsername);
@@ -49,4 +51,5 @@ public interface EventMapper {
 
     List<Picture> findPicByEventId(int eventId);
 
+    int getLastInsertId();
 }

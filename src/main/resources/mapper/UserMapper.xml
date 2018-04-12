@@ -5,6 +5,28 @@
 <!-- namespace命名空间，作用就是对sql进行分类化管理，理解sql隔离 注意：使用mapper代理方法开发，namespace有特殊重要的作用，namespace等于mapper接口地址 -->
 <mapper namespace="com.showaye.microappointment.dao.UserMapper">
 
+    <resultMap id="eventGeneralMap" type="com.showaye.microappointment.model.dto.EventGeneralResp">
+
+        <id column="C_ID" property="id"/>
+        <result column="C_CONTENT" property="content"/>
+        <result column="C_TYPE" property="typeId"/>
+        <result column="C_EXPIRE_TIME" property="expireTime"/>
+        <result column="C_LIKE_COUNT" property="likeCount"/>
+        <result column="C_COLLECT_COUNT" property="collectCount"/>
+        <result column="C_TITLE" property="title"/>
+        <result column="C_LOCATION" property="location"/>
+        <result column="C_TYPE_ID" property="typeId"/>
+        <result column="typeName" property="typeName"/>
+        <result column="publisherName" property="publisherName"/>
+        <result column="C_CREATE_TIME" property="createTime"/>
+        <collection property="pictureList" ofType="com.showaye.microappointment.model.entity.Picture">
+            <id column="pictureId" property="pictureId"/>
+            <result column="pictureUrl" property="pictureUrl"/>
+            <result column="eventId" property="eventId"/>
+        </collection>
+    </resultMap>
+
+
     <insert id="insertUser" useGeneratedKeys="true" keyProperty="id"
             parameterType="com.showaye.microappointment.model.entity.User">
         INSERT INTO t_user (C_OPEN_ID) VALUES (#{openid});
@@ -63,40 +85,26 @@
         FROM t_user
         WHERE C_ID = #{id};
     </select>
-    <select id="getAllMyEvents" resultType="com.showaye.microappointment.model.dto.EventGeneralResp">
+    <select id="getAllMyEvents" resultMap="eventGeneralMap">
 
         SELECT
-            e.C_ID            id,
-            e.C_CONTENT       content,
-            e.C_PICTURE_URL   pictureUrl,
-            e.C_TITLE         title,
-            e.C_TYPE_ID       typeId,
-            e.C_EXPIRE_TIME   expireTime,
-            e.C_LIKE_COUNT    likeCount,
-            e.C_LOCATION      location,
-            e.C_COLLECT_COUNT collectCount,
-            e.C_CREATE_TIME   createTime,
-            u.C_USERNAME      publisherName,
-            cd.C_NAME         typeName
-        FROM t_event e, t_user u, t_category_detail cd
+        e.*,
+        u.C_USERNAME publisherName,
+        cd.C_NAME typeName,
+        p.C_ID as pictureId,p.C_URL as pictureUrl,p.C_EVENT_ID as eventId
+        FROM (t_event e, t_user u, t_category_detail cd)
+        LEFT JOIN t_picture p ON e.C_ID = p.C_EVENT_ID
         WHERE e.C_PUBLISHER_ID = u.C_ID AND e.C_TYPE_ID = cd.C_ID AND e.C_PUBLISHER_ID = #{userId}
     </select>
-    <select id="getAllMyAttendEvents" resultType="com.showaye.microappointment.model.dto.EventGeneralResp">
+    <select id="getAllMyAttendEvents" resultMap="eventGeneralMap">
 
         SELECT
-            e.C_ID            id,
-            e.C_CONTENT       content,
-            e.C_PICTURE_URL   pictureUrl,
-            e.C_TITLE         title,
-            e.C_TYPE_ID       typeId,
-            e.C_EXPIRE_TIME   expireTime,
-            e.C_LIKE_COUNT    likeCount,
-            e.C_LOCATION      location,
-            e.C_COLLECT_COUNT collectCount,
-            e.C_CREATE_TIME   createTime,
-            u.C_USERNAME      publisherName,
-            cd.C_NAME         typeName
-        FROM t_event e, t_user u, t_category_detail cd
+        e.*,
+        u.C_USERNAME publisherName,
+        cd.C_NAME typeName,
+        p.C_ID as pictureId,p.C_URL as pictureUrl,p.C_EVENT_ID as eventId
+        FROM (t_event e, t_user u, t_category_detail cd)
+        LEFT JOIN t_picture p ON e.C_ID = p.C_EVENT_ID
         WHERE e.C_PUBLISHER_ID = u.C_ID AND e.C_TYPE_ID = cd.C_ID AND exists(SELECT C_EVENT_ID
                                                                              FROM t_event_att et
                                                                              WHERE et.C_ATTEND_USER_ID = #{userId} AND

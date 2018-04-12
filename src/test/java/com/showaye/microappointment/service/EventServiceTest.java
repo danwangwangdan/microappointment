@@ -10,10 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.Calendar;
+import java.util.Date;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = "classpath:springContext.xml")
+@ContextConfiguration(locations = "classpath:springContext_dev.xml")
 public class EventServiceTest {
 
 
@@ -58,7 +58,7 @@ public class EventServiceTest {
 
     @Test
     public void findEventGeneralsByTypeId() {
-        BaseResult baseResult = eventService.findEventGeneralsByTypeId(1, 1, 10);
+        BaseResult baseResult = eventService.findEventGeneralsByTypeId(1, 1, 200);
         System.out.println(baseResult.toString());
 
     }
@@ -87,15 +87,14 @@ public class EventServiceTest {
 
     @Test
     public void publishEvent() {
-
         Event event = new Event();
-        event.setTitle("王者荣耀走起来");
-        event.setLocation("齐友佳苑");
+        event.setTitle("王者荣耀走起来.....hhhh");
+        event.setLocation("齐友佳苑......jjjj");
         event.setLatitude(121.54);
         event.setLongitude(221.45);
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(2018, Calendar.MARCH, 5);
-        event.setExpireTime(calendar.getTime());
+       /* Calendar calendar = Calendar.getInstance();
+        calendar.set(2018, Calendar.MARCH, 5);*/
+        event.setExpireTime(new Date(System.currentTimeMillis() + 1000000));
         event.setPublisherId(1);
         event.setTypeId(1);
         System.out.println(event.toString());
