@@ -212,35 +212,6 @@
             LEFT JOIN t_comment c ON c.C_EVENT_ID = e.C_ID
             LEFT JOIN t_picture p ON e.C_ID = p.C_EVENT_ID
         WHERE e.C_PUBLISHER_ID = u1.C_ID AND e.C_CATEGORY_ID = cg.C_ID AND e.C_TYPE_ID = cd.C_ID AND
-              e.C_ID = #{eventId} AND e.C_status != 3
-        ORDER BY e.C_CREATE_TIME DESC
-    </select>
-
-    <select id="findEventDetailsByMyEvent" resultMap="eventAndCommentResultMap">
-        SELECT
-            e.*,
-            cg.C_NAME                          categoryName,
-            cd.C_NAME                          typeName,
-            u1.C_USERNAME                      publisherName,
-            c.C_CONTENT                        commentContent,
-            c.C_PUBLISHER_ID                   commenterId,
-            c.C_ID                             commentId,
-            (SELECT u4.C_USERNAME
-             FROM t_user u4
-             WHERE c.C_PUBLISHER_ID = u4.C_ID) commenterName,
-            ea.C_CONTRACT_TYPE,
-            ea.C_CONTRACT_NUM,
-            ea.C_ID                            contractId,
-            ea.C_ATTEND_USER_ID                contracterId,
-            ea.C_ATTEND_USERNAME               attenderName,
-            p.C_ID                             pictureId,
-
-            p.C_URL                            pictureUrl
-        FROM (t_event e, t_user u1, t_category_detail cd, t_category cg)
-            LEFT JOIN t_event_att ea ON ea.C_EVENT_ID = e.C_ID
-            LEFT JOIN t_comment c ON c.C_EVENT_ID = e.C_ID
-            LEFT JOIN t_picture p ON e.C_ID = p.C_EVENT_ID
-        WHERE e.C_PUBLISHER_ID = u1.C_ID AND e.C_CATEGORY_ID = cg.C_ID AND e.C_TYPE_ID = cd.C_ID AND
               e.C_ID = #{eventId}
         ORDER BY e.C_CREATE_TIME DESC
     </select>

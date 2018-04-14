@@ -26,14 +26,6 @@ public interface EventService {
      */
     BaseResult findEventDetailsByEventId(Integer eventId, Integer userId);
 
-    /**
-     * 从我的发起进活动详情（所有类型的都能查，包括已结束）
-     *
-     * @param eventId
-     * @param userId
-     * @return
-     */
-    BaseResult findEventDetailsByMyEvent(Integer eventId, Integer userId);
 
     BaseResult publishEvent(Event event);
 

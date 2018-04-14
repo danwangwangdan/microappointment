@@ -176,38 +176,6 @@ public class EventServiceImpl implements EventService {
         return baseResult;
     }
 
-    @Override
-    public BaseResult findEventDetailsByMyEvent(Integer eventId, Integer userId) {
-
-        BaseResult baseResult = new BaseResult();
-        boolean isAttender = false;
-        try {
-            EventDetailResp eventDetail = eventMapper.findEventDetailsByMyEvent(eventId);
-            // 判断是否为活动参加者
-            if (eventDetail.getContracts().size() > 0) {
-                for (EventAttend eventAttend : eventDetail.getContracts()) {
-                    if (eventAttend.getAttendUserId().intValue() == userId.intValue()) {
-                        isAttender = true;
-                    }
-                }
-            }
-            // 设置 用户类型
-            if (userId.intValue() == eventDetail.getPublisherId().intValue()) {
-                eventDetail.setUserType(EventResp.PUBLISHER);
-            } else if (isAttender) {
-                eventDetail.setUserType(EventResp.ATTENDER);
-            } else {
-                eventDetail.setUserType(EventResp.VISITOR);
-            }
-            baseResult.setData(eventDetail);
-        } catch (Exception e) {
-            e.printStackTrace();
-            log.error("findEventDetailsByEventId错误：" + e.toString());
-            baseResult.setCode(ResultConstant.SYSTEM_EXCEPTION.code);
-            baseResult.setMessage(ResultConstant.SYSTEM_EXCEPTION.message);
-        }
-        return baseResult;
-    }
 
     // @CacheEvict(value = {"search", "findEventDetailsByEventId", "findEventGeneralsByTypeId", "UserServiceImpl.getAllMyEvents", "UserServiceImpl.getAllMyAttendEvents"}, allEntries = true)
     @Override

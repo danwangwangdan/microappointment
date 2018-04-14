@@ -77,14 +77,6 @@ public class EventController {
         return baseResult;
     }
 
-    @RequestMapping("/itemDetailFromMyEvent")
-    public BaseResult getItemDetailFromMyEvent(HttpServletRequest request, @RequestParam Integer eventId, @RequestParam Integer userId) {
-
-        log.info("收到getItemDetail请求：" + eventId + "  " + userId);
-        BaseResult baseResult = eventService.findEventDetailsByMyEvent(eventId, userId);
-        log.info("getItemDetail返回信息：" + baseResult.toString());
-        return baseResult;
-    }
 
     @RequestMapping("/search")
     public BaseResult search(HttpServletRequest request, @RequestParam String keyWord, @RequestParam Integer pageNum, @RequestParam Integer pageSize) {
