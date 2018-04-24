@@ -171,7 +171,8 @@
         FROM (t_event e, t_user u, t_category_detail cd)
             LEFT JOIN t_picture p ON e.C_ID = p.C_EVENT_ID
         WHERE e.C_PUBLISHER_ID = u.C_ID AND e.C_TYPE_ID = cd.C_ID AND C_CONTENT LIKE CONCAT('%', #{keyWord}, '%') AND
-              e.C_status != 3
+              e.C_status != 3 AND
+        e.C_EXPIRE_TIME &gt; CURRENT_TIMESTAMP()
         ORDER BY e.C_CREATE_TIME DESC
     </select>
 
@@ -246,6 +247,8 @@
               AND C_LONGITUDE
                   &lt;
                   #{maxLng}
+              AND
+              e.C_EXPIRE_TIME &gt; CURRENT_TIMESTAMP()
         ORDER BY ACOS(SIN((#{latitude} * 3.1415) / 180) * SIN((C_LATITUDE * 3.1415) / 180)
                       + COS((#{latitude} * 3.1415) / 180) * COS((C_LATITUDE * 3.1415) / 180)
                         * COS((#{longitude} * 3.1415) / 180 - (C_LONGITUDE * 3.1415) / 180))
