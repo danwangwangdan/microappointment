@@ -307,6 +307,7 @@ public class EventServiceImpl implements EventService {
                 picture.setEventId(event.getId());
                 pictureMapper.insertPicture(picture);
             } else {
+                pictureMapper.deleteByEventId(event.getId());
                 for (Picture picture : event.getPictureUrls()) {
                     picture.setEventId(event.getId());
                     pictureMapper.insertPicture(picture);

@@ -183,7 +183,8 @@
         p.C_ID as pictureId,p.C_URL as pictureUrl,p.C_EVENT_ID as eventId
         FROM (t_event e, t_user u, t_category_detail cd)
         LEFT JOIN t_picture p ON e.C_ID = p.C_EVENT_ID
-        WHERE e.C_PUBLISHER_ID = u.C_ID AND e.C_TYPE_ID = cd.C_ID AND e.C_TYPE_ID = #{typeId} AND e.C_status != 3
+        WHERE e.C_PUBLISHER_ID = u.C_ID AND e.C_TYPE_ID = cd.C_ID AND e.C_TYPE_ID = #{typeId} AND e.C_status != 3 AND
+        e.C_EXPIRE_TIME &gt; CURRENT_TIMESTAMP()
         ORDER BY e.C_CREATE_TIME DESC
     </select>
 
@@ -232,7 +233,8 @@
         SELECT
             e.*,
             u.C_USERNAME publisherName,
-            cd.C_NAME    typeName
+        cd.C_NAME typeName,
+        p.C_ID as pictureId,p.C_URL as pictureUrl,p.C_EVENT_ID as eventId
         FROM (t_event e, t_user u, t_category_detail cd)
             LEFT JOIN t_picture p ON e.C_ID = p.C_EVENT_ID
         WHERE e.C_PUBLISHER_ID = u.C_ID AND e.C_TYPE_ID = cd.C_ID AND e.C_status != 3 AND

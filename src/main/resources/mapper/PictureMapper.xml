@@ -10,4 +10,10 @@
             (NULL, #{pictureUrl}, #{eventId});
     </insert>
 
+    <delete id="deleteByEventId" parameterType="int">
+        DELETE FROM t_picture
+        WHERE C_EVENT_ID = #{eventId}
+    </delete>
+
+
 </mapper>

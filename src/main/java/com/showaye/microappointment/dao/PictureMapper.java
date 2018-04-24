@@ -1,6 +1,7 @@
 package com.showaye.microappointment.dao;
 
 import com.showaye.microappointment.model.entity.Picture;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * @Author liu pengcheng
@@ -9,4 +10,6 @@ import com.showaye.microappointment.model.entity.Picture;
  */
 public interface PictureMapper {
     int insertPicture(Picture picture);
+
+    void deleteByEventId(@Param("eventId") Integer eventId);
 }
