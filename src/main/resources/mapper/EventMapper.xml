@@ -95,7 +95,7 @@
         INSERT INTO t_event VALUES
             (NULL, #{title}, #{typeId}, #{location}, #{latitude}, #{longitude}, #{expireTime},
                    #{limitNumber}, #{content}, #{publisherId}, 0, 0, 0,
-             current_timestamp, #{categoryId}, 1, 0);
+             current_timestamp, #{categoryId}, 1, 0, 0);
     </insert>
     <insert id="insertEventAttendInfo">
         INSERT INTO t_event_att
