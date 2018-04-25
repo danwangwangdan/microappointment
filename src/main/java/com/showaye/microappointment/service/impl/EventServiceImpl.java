@@ -381,6 +381,21 @@ public class EventServiceImpl implements EventService {
         return baseResult;
     }
 
+    @Override
+    public BaseResult<List<EventGeneralResp>> findExpiredEvents() {
+        BaseResult baseResult = new BaseResult();
+        try {
+            List<EventGeneralResp> result = eventMapper.findExpiredEvents();
+            baseResult.setData(result);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("findExpiredEvents错误：" + e.toString());
+            baseResult.setCode(ResultConstant.SYSTEM_EXCEPTION.code);
+            baseResult.setMessage(ResultConstant.SYSTEM_EXCEPTION.message);
+        }
+        return baseResult;
+    }
+
 
     private boolean checkEvent(Event event, BaseResult baseResult) {
         if (StringUtils.isBlank(event.getTitle()) || StringUtils.isBlank(event.getLocation())) {

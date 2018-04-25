@@ -1,9 +1,12 @@
 package com.showaye.microappointment.service;
 
 import com.showaye.microappointment.model.base.BaseResult;
+import com.showaye.microappointment.model.dto.EventGeneralResp;
 import com.showaye.microappointment.model.dto.LocationReq;
 import com.showaye.microappointment.model.entity.Event;
 import com.showaye.microappointment.model.entity.EventAttend;
+
+import java.util.List;
 
 public interface EventService {
 
@@ -64,5 +67,13 @@ public interface EventService {
      * @return
      */
     BaseResult getLatest();
+
+    /**
+     * 查询已过期的活动
+     *
+     * @return
+     */
+    BaseResult<List<EventGeneralResp>> findExpiredEvents();
+
 
 }

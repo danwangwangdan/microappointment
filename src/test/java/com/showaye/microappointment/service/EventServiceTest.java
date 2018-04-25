@@ -13,7 +13,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import java.util.Date;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = "classpath:springContext_dev.xml")
+@ContextConfiguration(locations = "classpath:springContext.xml")
 public class EventServiceTest {
 
 
@@ -100,5 +100,10 @@ public class EventServiceTest {
         System.out.println(event.toString());
         BaseResult baseResult = eventService.publishEvent(event);
         System.out.println(baseResult.toString());
+    }
+
+    @Test
+    public void findExpiredEvents() {
+        System.out.println(eventService.findExpiredEvents());
     }
 }

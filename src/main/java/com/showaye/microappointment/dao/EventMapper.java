@@ -50,4 +50,6 @@ public interface EventMapper {
     List<Picture> findPicByEventId(int eventId);
 
     int getLastInsertId();
+
+    List<EventGeneralResp> findExpiredEvents();
 }

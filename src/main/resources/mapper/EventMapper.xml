@@ -165,27 +165,29 @@
 
         SELECT
             e.*,
-            u.C_USERNAME publisherName,
-        cd.C_NAME typeName,
-        p.C_ID as pictureId,p.C_URL as pictureUrl,p.C_EVENT_ID as eventId
+            u.C_USERNAME    publisherName,
+            cd.C_NAME       typeName,
+            p.C_ID       as pictureId,
+            p.C_URL      as pictureUrl,
+            p.C_EVENT_ID as eventId
         FROM (t_event e, t_user u, t_category_detail cd)
             LEFT JOIN t_picture p ON e.C_ID = p.C_EVENT_ID
         WHERE e.C_PUBLISHER_ID = u.C_ID AND e.C_TYPE_ID = cd.C_ID AND C_CONTENT LIKE CONCAT('%', #{keyWord}, '%') AND
-              e.C_status != 3 AND
-        e.C_EXPIRE_TIME &gt; CURRENT_TIMESTAMP()
+              e.C_status != 3
         ORDER BY e.C_CREATE_TIME DESC
     </select>
 
     <select id="findEventGeneralsByTypeId" resultMap="eventGeneralMap">
         SELECT
-        e.*,
-        u.C_USERNAME publisherName,
-        cd.C_NAME typeName,
-        p.C_ID as pictureId,p.C_URL as pictureUrl,p.C_EVENT_ID as eventId
+            e.*,
+            u.C_USERNAME    publisherName,
+            cd.C_NAME       typeName,
+            p.C_ID       as pictureId,
+            p.C_URL      as pictureUrl,
+            p.C_EVENT_ID as eventId
         FROM (t_event e, t_user u, t_category_detail cd)
-        LEFT JOIN t_picture p ON e.C_ID = p.C_EVENT_ID
-        WHERE e.C_PUBLISHER_ID = u.C_ID AND e.C_TYPE_ID = cd.C_ID AND e.C_TYPE_ID = #{typeId} AND e.C_status != 3 AND
-        e.C_EXPIRE_TIME &gt; CURRENT_TIMESTAMP()
+            LEFT JOIN t_picture p ON e.C_ID = p.C_EVENT_ID
+        WHERE e.C_PUBLISHER_ID = u.C_ID AND e.C_TYPE_ID = cd.C_ID AND e.C_TYPE_ID = #{typeId} AND e.C_status != 3
         ORDER BY e.C_CREATE_TIME DESC
     </select>
 
@@ -233,9 +235,11 @@
 
         SELECT
             e.*,
-            u.C_USERNAME publisherName,
-        cd.C_NAME typeName,
-        p.C_ID as pictureId,p.C_URL as pictureUrl,p.C_EVENT_ID as eventId
+            u.C_USERNAME    publisherName,
+            cd.C_NAME       typeName,
+            p.C_ID       as pictureId,
+            p.C_URL      as pictureUrl,
+            p.C_EVENT_ID as eventId
         FROM (t_event e, t_user u, t_category_detail cd)
             LEFT JOIN t_picture p ON e.C_ID = p.C_EVENT_ID
         WHERE e.C_PUBLISHER_ID = u.C_ID AND e.C_TYPE_ID = cd.C_ID AND e.C_status != 3 AND
@@ -247,8 +251,6 @@
               AND C_LONGITUDE
                   &lt;
                   #{maxLng}
-              AND
-              e.C_EXPIRE_TIME &gt; CURRENT_TIMESTAMP()
         ORDER BY ACOS(SIN((#{latitude} * 3.1415) / 180) * SIN((C_LATITUDE * 3.1415) / 180)
                       + COS((#{latitude} * 3.1415) / 180) * COS((C_LATITUDE * 3.1415) / 180)
                         * COS((#{longitude} * 3.1415) / 180 - (C_LONGITUDE * 3.1415) / 180))
@@ -259,12 +261,14 @@
     <select id="findThreeEventsOrderByTime" resultMap="eventGeneralMap">
         SELECT
             e.*,
-            u.C_USERNAME publisherName,
-        cd.C_NAME typeName,
-        p.C_ID as pictureId,p.C_URL as pictureUrl,p.C_EVENT_ID as eventId
+            u.C_USERNAME    publisherName,
+            cd.C_NAME       typeName,
+            p.C_ID       as pictureId,
+            p.C_URL      as pictureUrl,
+            p.C_EVENT_ID as eventId
         FROM (t_event e, t_user u, t_category_detail cd)
             LEFT JOIN t_picture p ON e.C_ID = p.C_EVENT_ID
-        WHERE e.C_PUBLISHER_ID = u.C_ID AND e.C_TYPE_ID = cd.C_ID AND e.C_status != 3
+        WHERE e.C_IS_REC = 1
         ORDER BY e.C_CREATE_TIME DESC
         LIMIT 3;
     </select>
@@ -280,6 +284,11 @@
 
     <select id="getLastInsertId" resultType="int">
         SELECT LAST_INSERT_ID();
+    </select>
+    <select id="findExpiredEvents" resultMap="eventGeneralMap">
+        SELECT *
+        FROM t_event
+        WHERE C_EXPIRE_TIME &lt;= CURRENT_TIMESTAMP()
     </select>
 
 </mapper>
