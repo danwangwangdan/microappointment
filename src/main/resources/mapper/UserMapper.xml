@@ -95,6 +95,7 @@
         FROM (t_event e, t_user u, t_category_detail cd)
         LEFT JOIN t_picture p ON e.C_ID = p.C_EVENT_ID
         WHERE e.C_PUBLISHER_ID = u.C_ID AND e.C_TYPE_ID = cd.C_ID AND e.C_PUBLISHER_ID = #{userId}
+        ORDER BY e.C_CREATE_TIME DESC
     </select>
     <select id="getAllMyAttendEvents" resultMap="eventGeneralMap">
 
@@ -109,5 +110,6 @@
                                                                              FROM t_event_att et
                                                                              WHERE et.C_ATTEND_USER_ID = #{userId} AND
                                                                                    e.C_ID = et.C_event_id)
+        ORDER BY e.C_CREATE_TIME DESC
     </select>
 </mapper>
