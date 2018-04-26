@@ -14,6 +14,7 @@ import com.showaye.microappointment.model.dto.EventResp;
 import com.showaye.microappointment.model.dto.LocationReq;
 import com.showaye.microappointment.model.entity.*;
 import com.showaye.microappointment.service.EventService;
+import com.showaye.microappointment.util.EmojiFilter;
 import com.showaye.microappointment.util.MapUtil;
 import com.showaye.microappointment.util.PropertiesUtil;
 import org.apache.commons.lang.StringUtils;
@@ -418,6 +419,9 @@ public class EventServiceImpl implements EventService {
             calendar.add(Calendar.DATE, +7);
             event.setExpireTime(calendar.getTime());
         }
+        // 过滤表情字符
+        event.setContent(EmojiFilter.filterEmoji(event.getContent()));
+        event.setTitle(EmojiFilter.filterEmoji(event.getTitle()));
         return false;
     }
 }
