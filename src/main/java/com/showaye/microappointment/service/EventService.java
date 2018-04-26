@@ -21,7 +21,7 @@ public interface EventService {
     BaseResult findEventGeneralsByTypeId(Integer typeId, Integer pageNum, Integer pageSize);
 
     /**
-     * 活动详情（不包括已结束）
+     * 活动详情
      *
      * @param eventId
      * @param userId
@@ -62,7 +62,7 @@ public interface EventService {
     BaseResult findNearby(LocationReq locationReq);
 
     /**
-     * 获取最新的三条活动
+     * 获取轮播图活动列表
      *
      * @return
      */
