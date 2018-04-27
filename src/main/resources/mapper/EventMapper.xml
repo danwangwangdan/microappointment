@@ -287,7 +287,7 @@
     <select id="findExpiredEvents" resultMap="eventGeneralMap">
         SELECT *
         FROM t_event
-        WHERE C_EXPIRE_TIME &lt;= CURRENT_TIMESTAMP()
+        WHERE C_EXPIRE_TIME &lt;= CURRENT_TIMESTAMP() and c_status != 3
     </select>
 
 </mapper>
