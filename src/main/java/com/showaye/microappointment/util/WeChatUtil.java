@@ -9,7 +9,7 @@ public class WeChatUtil {
 
     private static final Logger log = LoggerFactory.getLogger(WeChatUtil.class);
     private static String APP_ID = "wxf1dd1c5aebeda934";
-    private static String APP_SECRET = "53f87c7501e91997dbd2bb0e3a0b281b";
+    private static String APP_SECRET = "cd02d9cd61ee918a6765e1796b42bfe8";
 
     /**
      * 通过code获取sessionKey
